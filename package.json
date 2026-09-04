@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "docgen": "docgen",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "lint": "oxlint",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.1",
+    "@effect/docgen": "^0.5.2",
     "@effect/tsgo": "0.40.0",
     "oxfmt": "^0.66.0",
     "oxlint": "1.81.0",
