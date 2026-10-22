@@ -1,40 +1,46 @@
 {
   "$schema": "./node_modules/@effect/tsgo/schema.json",
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./src",
-    "outDir": "./dist",
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
+    // The family's library compiler options (effect-web's tsconfig.base.json),
+    // so this package compiles under exactly the options its consumers use.
+    // `erasableSyntaxOnly` because the apps load TypeScript under Node's
+    // strip-only loader; a library file that uses enums / namespaces /
+    // parameter properties would fail there.
+    "erasableSyntaxOnly": true,
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "target": "esnext",
+    "lib": ["esnext"],
     "types": [],
-    // Other Outputs
+    // Source imports are written `./x.ts`; the build rewrites them to `./x.js`.
+    "rewriteRelativeImportExtensions": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    // Optional members are spelled `?: T | undefined` because of this flag: a
+    // consumer forwarding an optional of its own must still compile.
     "exactOptionalPropertyTypes": true,
-    // Style Options
+    "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "noEmit": true,
     "plugins": [
       {
         "name": "@effect/language-service",
+        // The severities below keep every Effect rule visible in the editor,
+        // but a "warning" still fails the patched tsc by default — this flag
+        // is what actually makes warnings non-blocking in the check task.
+        "ignoreEffectWarningsInTscExitCode": true,
         "diagnosticSeverity": {
           "abortControllerInEffect": "warning",
           "asyncFunction": "warning",
@@ -56,9 +62,11 @@
           "nodeBuiltinImport": "warning",
           "preferSchemaOverJson": "warning",
           "processEnv": "warning",
-          "processEnvInEffect": "warning"
+          "processEnvInEffect": "warning",
+          "unsafeEffectTypeAssertion": "warning"
         }
       }
-    ],
-  }
+    ]
+  },
+  "include": ["src"]
 }

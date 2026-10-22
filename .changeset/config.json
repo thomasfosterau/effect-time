@@ -1,17 +1,12 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@4.0.0/schema.json",
-  "baseBranch": "main",
-  "access": "public",
-  "format": "auto",
-  "changelog": [
-    "@changesets/changelog-github",
-    {
-      "repo": "thomasfosterau/effect-time"
-    }
-  ],
-  "commit": true,
-  "ignore": [],
+  "changelog": ["@changesets/changelog-github", { "repo": "thomasfosterau/effect-time" }],
+  "format": false,
+  "commit": false,
   "fixed": [],
   "linked": [],
-  "updateInternalDependencies": "patch"
+  "access": "public",
+  "baseBranch": "trunk",
+  "updateInternalDependencies": "patch",
+  "ignore": []
 }

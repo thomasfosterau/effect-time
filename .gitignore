@@ -57,3 +57,21 @@ vite.config.ts.timestamp-*
 
 # Vitest reports and artifacts
 .vitest/
+# Built package output (`vp run build`); published to npm, never committed.
+dist/
+
+# Generated API reference (`vp run docgen`). Never committed; the README is
+# the reference consumers read.
+docs/
+
+# The generated git-hook runner; the editable hook itself is committed.
+.vite-hooks/_/
+
+# Fallow caches and reports.
+.fallow
+fallow.sarif
+
+# Claude Code local state.
+.claude/settings.local.json
+.claude/worktrees/
+.claude/scheduled_tasks.lock

@@ -1,34 +1,76 @@
 {
+  "$schema": "https://www.schemastore.org/package",
   "name": "@thomasfosterau/effect-time",
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "docgen": "docgen",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "test": "vitest",
-    "prepare": "effect-tsgo patch --typescript --oxlint"
-  },
+  "description": "Time for Effect applications: Effect's Clock and DateTime modules under one import, for code that reads the time through the Clock service and does calendar arithmetic on DateTime values.",
   "keywords": [
-    "effect"
+    "clock",
+    "date",
+    "datetime",
+    "effect",
+    "time",
+    "timezone",
+    "typescript"
   ],
-  "author": "Thomas Foster <me@thomasfoster.au>",
+  "homepage": "https://github.com/thomasfosterau/effect-time#readme",
+  "bugs": {
+    "url": "https://github.com/thomasfosterau/effect-time/issues"
+  },
   "license": "MIT",
-  "packageManager": "pnpm@10.32.1",
-  "dependencies": {
-    "effect": "4.0.0-rc.112"
+  "author": "Thomas Foster <me@thomasfoster.au>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomasfosterau/effect-time.git"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "changeset": "changeset",
+    "version": "changeset version && vp fmt && pnpm install --lockfile-only",
+    "release": "vp run build && pnpm publish --access public --no-git-checks --ignore-scripts && changeset tag",
+    "fallow": "fallow --summary",
+    "fallow:audit": "fallow audit --base origin/trunk",
+    "prepare": "vp config && effect-tsgo patch --typescript --oxlint"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.1",
-    "@effect/docgen": "^0.5.2",
-    "@effect/tsgo": "0.40.0",
-    "oxfmt": "^0.66.0",
-    "oxlint": "1.81.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
-  }
+    "@changesets/changelog-github": "catalog:",
+    "@changesets/cli": "catalog:",
+    "@effect/docgen": "catalog:",
+    "@effect/language-service": "catalog:",
+    "@effect/tsgo": "catalog:",
+    "@mpsuesser/oxlint-plugin-effect": "catalog:",
+    "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
+    "effect": "catalog:",
+    "fallow": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "effect": "catalog:peers"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=11"
+  },
+  "packageManager": "pnpm@11.18.0"
 }
