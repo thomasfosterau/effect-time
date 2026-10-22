@@ -24,6 +24,9 @@ catalogs:
     '@mpsuesser/oxlint-plugin-effect':
       specifier: ^0.6.0
       version: 0.6.0
+    '@thomasfosterau/effect-parse':
+      specifier: ^0.1.0
+      version: 0.1.0
     '@types/node':
       specifier: ^26.6.5
       version: 26.6.5
@@ -73,6 +76,9 @@ importers:
       '@mpsuesser/oxlint-plugin-effect':
         specifier: 'catalog:'
         version: 0.6.0
+      '@thomasfosterau/effect-parse':
+        specifier: 'catalog:'
+        version: 0.1.0(effect@4.0.5)
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.5
@@ -909,6 +915,12 @@ packages:
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
+
+  '@thomasfosterau/effect-parse@0.1.0':
+    resolution: {integrity: sha512-SQ9GwUsAqvrgT0R7z8GhYAKnRHQgSssFFG9k3HAGCYJWYjbdZyy9bOkhqSDbyBRwLjfNQ2mwkm0TratRRaa6JQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      effect: 4.0.5
 
   '@ts-morph/common@0.29.0':
     resolution: {integrity: sha512-35oUmphHbJvQ/+UTwFNme/t2p3FoKiGJ5auTjjpNTop2dyREspirjMy82PLSC1pnDJ8ah1GU98hwpVt64YXQsg==}
@@ -2720,6 +2732,10 @@ snapshots:
   '@testing-library/user-event@14.6.8(@testing-library/dom@10.4.2)':
     dependencies:
       '@testing-library/dom': 10.4.2
+
+  '@thomasfosterau/effect-parse@0.1.0(effect@4.0.5)':
+    dependencies:
+      effect: 4.0.5
 
   '@ts-morph/common@0.29.0':
     dependencies:

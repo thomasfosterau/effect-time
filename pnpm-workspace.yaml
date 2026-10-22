@@ -44,6 +44,9 @@ catalog:
   # `vite.config.ts` load calls Effect APIs, so an `effect` bump re-runs
   # `vp check` against the plugin too.
   "@mpsuesser/oxlint-plugin-effect": ^0.6.0
+  # The parser combinators behind `Rfc3339` and `IsoDuration`; a peer as well
+  # (see `catalogs.peers`), so this is the copy the tests and docgen run on.
+  "@thomasfosterau/effect-parse": ^0.1.0
   "@types/node": ^26.6.5
   # Must equal the vitest that vite-plus bundles (see `vitest` below); vite-plus
   # refuses to run coverage on a mismatch.
@@ -78,11 +81,14 @@ catalog:
 # manifest.
 catalogs:
   peers:
-    # The family's floor: rc.118 removed every `effect/unstable/*` export path
-    # and is the line every consuming application moved to (website#2015).
-    # This package imports only `effect/Clock` and `effect/DateTime`, which
-    # exist on every 4.x release from that floor on.
-    effect: ">=4.0.0-rc.118"
+    # effect-parse declares `effect: ^4.0.0`, so 4.0.0 is the floor this
+    # package can honestly claim (the family's earlier floor, rc.118, is below
+    # it). Every `effect/*` path `src/` imports exists from 4.0.0 on.
+    effect: ^4.0.0
+    # A peer, not a dependency, for the same reason as `effect`: it carries
+    # `ParseError` and `Parser` values a consumer composes with, and it peers
+    # on `effect` itself.
+    "@thomasfosterau/effect-parse": ^0.1.0
 
 overrides:
   vite: "catalog:"
