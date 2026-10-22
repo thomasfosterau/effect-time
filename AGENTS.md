@@ -41,7 +41,7 @@ This repo publishes one package from its root: `@thomasfosterau/effect-time`, Ef
 - `vp run test:coverage` — the unit suite under an Istanbul map at `coverage/coverage-final.json`, which `fallow audit` reads for per-function CRAP scores.
 - `pnpm changeset` — add a changeset.
 
-Invoke everything through `vp` (`vp exec` instead of `npx`; `vp run <task>` instead of bare `pnpm`). The sanctioned non-`vp` invocations: `pnpm install` (and `pnpm install --frozen-lockfile` in CI), `pnpm changeset` / `pnpm publish` on the release path, `pnpm audit`. Single-check variants are in [CONTRIBUTING.md](CONTRIBUTING.md#running-individual-checks).
+Node and pnpm only: no bun, deno, npm or yarn commands or lockfiles. Invoke everything through `vp` (`vp exec <bin>` for a dev binary; `vp run <task>` instead of bare `pnpm`). The sanctioned non-`vp` invocations: `pnpm install` (and `pnpm install --frozen-lockfile` in CI), `pnpm changeset` / `pnpm publish` on the release path, `pnpm audit`. Single-check variants are in [CONTRIBUTING.md](CONTRIBUTING.md#running-individual-checks).
 
 ## Verification
 
@@ -73,7 +73,7 @@ Steps 2–7 are CI's required `ci` job, in its order ([ci.yml](.github/workflows
 
 ## Effect
 
-Consult effect-solutions before writing Effect code (`vp exec effect-solutions list`, then `vp exec effect-solutions show <topic>…`); never guess at an Effect pattern. If it isn't enough, read `node_modules/effect/dist/*.d.ts` (`Clock.d.ts`, `DateTime.d.ts`, `testing/TestClock.d.ts`).
+Read the installed package before writing Effect code: `node_modules/effect/AGENTS.md` and `node_modules/effect/ai-docs/`, the declarations in `node_modules/effect/dist/*.d.ts` (`Clock.d.ts`, `DateTime.d.ts`, `testing/TestClock.d.ts`) and the source in `node_modules/effect/src`. Never guess at an Effect API.
 
 - The pinned version is the `effect` entry in `pnpm-workspace.yaml`'s catalog; the published peer floor is under `catalogs.peers`. Raising the floor is a breaking change.
 - Tagged errors are `Schema.TaggedError<Self>()(tag, fields)` classes.
