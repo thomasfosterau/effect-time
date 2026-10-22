@@ -44,7 +44,7 @@
     "version": "changeset version && vp fmt && pnpm install --lockfile-only",
     "release": "vp run build && pnpm publish --access public --no-git-checks --ignore-scripts && changeset tag",
     "fallow": "fallow --summary",
-    "fallow:audit": "fallow audit",
+    "fallow:audit": "fallow audit --base origin/trunk",
     "prepare": "vp config && effect-tsgo patch --typescript --oxlint"
   },
   "devDependencies": {
