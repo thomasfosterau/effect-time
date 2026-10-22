@@ -2,12 +2,16 @@
   "$schema": "https://www.schemastore.org/package",
   "name": "@thomasfosterau/effect-time",
   "version": "0.0.0",
-  "description": "Time for Effect applications: Effect's Clock and DateTime modules under one import, for code that reads the time through the Clock service and does calendar arithmetic on DateTime values.",
+  "description": "Time for Effect applications: Effect's Clock and DateTime modules under one import, with RFC 3339 and ISO 8601 duration parsers that produce DateTime values.",
   "keywords": [
     "clock",
     "date",
     "datetime",
+    "duration",
     "effect",
+    "iso8601",
+    "parser",
+    "rfc3339",
     "time",
     "timezone",
     "typescript"
@@ -54,6 +58,7 @@
     "@effect/language-service": "catalog:",
     "@effect/tsgo": "catalog:",
     "@mpsuesser/oxlint-plugin-effect": "catalog:",
+    "@thomasfosterau/effect-parse": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "@vitest/coverage-istanbul": "catalog:",
@@ -66,6 +71,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
+    "@thomasfosterau/effect-parse": "catalog:peers",
     "effect": "catalog:peers"
   },
   "engines": {

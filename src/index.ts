@@ -4,7 +4,8 @@
  *
  * Read the current time through `Clock` (so a test can swap in `TestClock`)
  * and do calendar arithmetic, formatting and time-zone conversion on
- * `DateTime` values, never on the global `Date`.
+ * `DateTime` values, never on the global `Date`. Parse RFC 3339 timestamps
+ * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`.
  *
  * @since 0.1.0
  */
@@ -58,3 +59,42 @@ export * as Clock from "effect/Clock";
  * @since 0.1.0
  */
 export * as DateTime from "effect/DateTime";
+
+/**
+ * RFC 3339 date-times (`2026-10-22T09:30:00+10:00`) parsed to and printed from
+ * `DateTime` values: a parser to compose, an effectful decoder and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { Rfc3339 } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(Rfc3339.parse("2026-10-22T09:30:00+10:00")).then((dt) =>
+ *   console.log(Rfc3339.format(dt)) // "2026-10-22T09:30:00.000+10:00"
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as Rfc3339 from "./Rfc3339.ts";
+
+/**
+ * ISO 8601 durations (`P1Y2M3DT4H5M6S`, `P2W`) parsed to and printed from the
+ * amounts `DateTime.add` takes: a parser to compose, an effectful decoder, a
+ * printer and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { IsoDuration } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(IsoDuration.parse("P2W")).then((duration) =>
+ *   console.log(duration.weeks) // 2
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as IsoDuration from "./IsoDuration.ts";

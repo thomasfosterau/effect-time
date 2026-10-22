@@ -2,7 +2,7 @@
 
 `CLAUDE.md` is a symlink to this file. Project conventions live here; personal style preferences live in user memory.
 
-This repo publishes one package from its root: `@thomasfosterau/effect-time`, Effect's `Clock` and `DateTime` modules under one import. It is a thin, curated surface over `effect`, not a reimplementation: every export is an Effect module re-exported unchanged, and the package's value is the choice of what belongs together and the documentation around it.
+This repo publishes one package from its root: `@thomasfosterau/effect-time`, Effect's `Clock` and `DateTime` modules under one import, plus parsers for time's string formats (`Rfc3339`, `IsoDuration`) built on `@thomasfosterau/effect-parse`. It is a thin, curated surface over `effect`, not a reimplementation: `Clock` and `DateTime` are Effect's modules re-exported unchanged, the modules of its own produce and consume Effect's `DateTime` values, and the package's value is the choice of what belongs together and the documentation around it.
 
 | Package                       | Directory             | Entries |
 | ----------------------------- | --------------------- | ------- |
@@ -10,18 +10,18 @@ This repo publishes one package from its root: `@thomasfosterau/effect-time`, Ef
 
 ## Boundary and invariants
 
-- **Peer: `effect` only.** No runtime dependency. `src/index.ts` imports only `effect/*` paths that exist on every release from the peer floor (`catalogs.peers` in `pnpm-workspace.yaml`).
+- **Peers: `effect` and `@thomasfosterau/effect-parse`.** No runtime dependency. `src/` imports only `effect/*` and `@thomasfosterau/effect-parse/*` paths that exist on every release from the peer floors (`catalogs.peers` in `pnpm-workspace.yaml`).
 - **Re-exports are identity.** `Clock` is `effect/Clock` and `DateTime` is `effect/DateTime`, the same module objects (`tests/index.test.ts` asserts `toBe`). A consumer's `Clock` must read the service `TestClock` replaces, and a `DateTime` from here must be accepted by `effect/DateTime`; a wrapper or a copy breaks both.
 - **A new export is a new module, not a helper on an existing one.** Anything this package adds of its own goes in `src/<Module>.ts`, re-exported from `src/index.ts` as `export * as <Module>`, with its own tests.
 
 ## Common pitfalls
 
 - **Never edit a version in `package.json`.** Versions live in the `pnpm-workspace.yaml` catalog (`catalogMode: strict` rejects anything else). After editing it, run `pnpm install` and commit `pnpm-lock.yaml`, or CI fails with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. `@effect/tsgo`, `@typescript/native` and `vite-plus` move together (the tsgo patch hard-errors at install on an unsupported `tsc` or `oxlint`); read their catalog comments first.
-- **`effect` is a peer, never a dependency.** Two copies break `Context` / `Layer` / `Schema` identity; the consuming app owns the singleton.
+- **`effect` and `@thomasfosterau/effect-parse` are peers, never dependencies.** Two copies of `effect` break `Context` / `Layer` / `Schema` identity, and effect-parse peers on `effect` itself; the consuming app owns both singletons.
 - **`dist/` is the product.** `vp pack` (tsdown) emits one ESM bundle and declaration file; `exports` points at `dist/`. `"sideEffects": false` is a claim about it: no top-level statements.
 - **`vp run docgen` executes your examples.** `@effect/docgen` compiles every JSDoc `@example` and runs it (`"runExamples": true` in `docgen.json`), importing the package by name through `dist/`. An example must import everything it uses, must not use `declare const`, and must not throw.
 - **`effect/Date` does not exist.** Effect 4 has `effect/DateTime` and `effect/Clock`; JavaScript `Date` interop is `DateTime.toDateUtc` / `DateTime.make(date)`.
-- **The coverage map is empty today.** `src/index.ts` is all re-exports, so Istanbul counts no statements and `coverage/coverage-final.json` is `{}`. The first module with code of its own changes that, and the 90 / 85 / 90 / 90 thresholds in `vite.config.ts` apply to it.
+- **Coverage thresholds apply to the modules of our own.** `src/index.ts` is all re-exports, so Istanbul counts only `src/Rfc3339.ts`, `src/IsoDuration.ts` and their successors against the 90 / 85 / 90 / 90 thresholds in `vite.config.ts`.
 
 ## Conventions
 
