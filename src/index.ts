@@ -5,7 +5,8 @@
  * Read the current time through `Clock` (so a test can swap in `TestClock`)
  * and do calendar arithmetic, formatting and time-zone conversion on
  * `DateTime` values, never on the global `Date`. Parse RFC 3339 timestamps
- * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`.
+ * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`,
+ * and RFC 9557 time zone and annotation suffixes with `Rfc9557`.
  *
  * @since 0.1.0
  */
@@ -78,6 +79,26 @@ export * as DateTime from "effect/DateTime";
  * @since 0.1.0
  */
 export * as Rfc3339 from "./Rfc3339.ts";
+
+/**
+ * RFC 9557 extended date-times (`2026-10-22T09:30:00+11:00[Australia/Sydney]`):
+ * an RFC 3339 date-time with a time zone and tagged annotations in brackets,
+ * as a parser to compose, an effectful decoder, a printer and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { Rfc3339, Rfc9557 } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(Rfc9557.parse("2026-10-22T00:00:00Z[Australia/Sydney]")).then((ixdtf) =>
+ *   console.log(Rfc3339.format(Rfc9557.toDateTime(ixdtf))) // "2026-10-22T11:00:00.000+11:00"
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as Rfc9557 from "./Rfc9557.ts";
 
 /**
  * ISO 8601 durations (`P1Y2M3DT4H5M6S`, `P2W`) parsed to and printed from the

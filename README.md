@@ -21,9 +21,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `Clock` | `effect/Clock` | Reading the current time as an effect (`currentTimeMillis`, `currentTimeNanos`, `clockWith`). |
 | `DateTime` | `effect/DateTime` | Constructing, comparing, adding to, formatting and converting instants in UTC or a time zone. |
 | `Rfc3339` | this package | Parsing and printing RFC 3339 date-times: `parser`, `parse`, `format`, `FromString`. |
+| `Rfc9557` | this package | Parsing and printing RFC 9557 (IXDTF) date-times with time zone and annotation suffixes: `parser`, `parse`, `toDateTime`, `format`, `FromString`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -94,6 +95,23 @@ expected day of month (01-28), found "3"
 ```
 
 `Z` and `-00:00` (UTC, local offset unknown) give a `DateTime.Utc`. Any other offset gives a `DateTime.Zoned` in that fixed offset, so `Rfc3339.format` prints it back unchanged. Fractional seconds are truncated to milliseconds. A leap second (`:60`) is rejected because `DateTime` cannot hold it. `Rfc3339.parser` is the effect-parse `Parser`, for embedding a timestamp in a larger grammar.
+
+### `Rfc9557`
+
+```ts
+import { Effect } from "effect";
+import { Rfc3339, Rfc9557 } from "@thomasfosterau/effect-time";
+
+const program = Effect.map(
+  Rfc9557.parse("2026-10-22T00:00:00Z[Australia/Sydney][u-ca=gregory]"),
+  (ixdtf) => Rfc3339.format(Rfc9557.toDateTime(ixdtf)),
+);
+// "2026-10-22T11:00:00.000+11:00"
+```
+
+The grammar is RFC 9557's `date-time-ext`: an RFC 3339 date-time (read by `Rfc3339.parser`), then at most one time zone suffix (`[Europe/Paris]`, `[+05:30]`), then any number of annotations (`[u-ca=hebrew]`, `[_x-key=a-b]`). A suffix starting with `!` is critical. The result is an `Ixdtf`: the instant as the written offset fixes it, the time zone suffix (`Option`) and the annotations, as written. `Rfc9557.toDateTime` views the instant in the suffixed time zone when `DateTime` knows it.
+
+Following RFC 9557 §3.4, a critical time zone that `DateTime` does not know, or whose offset at the instant differs from a numeric written offset, fails the parse; an elective one is kept as written. Critical annotations are reported with `critical: true` and never acted on: an application must reject the critical keys it does not understand itself. `Rfc9557.format` prints an `Ixdtf` back, and `Rfc9557.FromString` is the `Schema` from the string.
 
 ### `IsoDuration`
 
