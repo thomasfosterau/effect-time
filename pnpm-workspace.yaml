@@ -37,7 +37,7 @@ catalog:
   # on any other component version, failing `pnpm install` itself. Read the
   # `components` table in node_modules/@effect/tsgo/dist/effect-tsgo.cjs
   # before bumping any of the three.
-  "@effect/tsgo": 0.55.0
+  "@effect/tsgo": 0.57.0
   # 0.6.0 depends on `effect` 4.0.0 (exact) and runs on the singleton the
   # `effect` override below forces; it loads cleanly on 4.0.x, so no scoped
   # override is needed (0.5.0's `Schema.isIncludes` crash is gone). Its
@@ -71,7 +71,7 @@ catalog:
   # and `vitest` must match vite-plus's exact pin because the
   # `vitest: "catalog:"` override forces every resolution to the catalog
   # singleton.
-  vite-plus: 1.3.0
+  vite-plus: 1.4.0
   vite: npm:@voidzero-dev/vite-plus-core@1.3.0
   vitest: 5.0.5
 
