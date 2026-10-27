@@ -46,7 +46,7 @@ catalog:
   "@mpsuesser/oxlint-plugin-effect": ^0.6.0
   # The parser combinators behind `Rfc3339` and `IsoDuration`; a peer as well
   # (see `catalogs.peers`), so this is the copy the tests and docgen run on.
-  "@thomasfosterau/effect-parse": ^0.1.0
+  "@thomasfosterau/effect-parse": ^0.3.0
   "@types/node": ^26.6.5
   # Must equal the vitest that vite-plus bundles (see `vitest` below); vite-plus
   # refuses to run coverage on a mismatch.
@@ -88,7 +88,7 @@ catalogs:
     # A peer, not a dependency, for the same reason as `effect`: it carries
     # `ParseError` and `Parser` values a consumer composes with, and it peers
     # on `effect` itself.
-    "@thomasfosterau/effect-parse": ^0.1.0
+    "@thomasfosterau/effect-parse": ^0.3.0
 
 overrides:
   vite: "catalog:"
