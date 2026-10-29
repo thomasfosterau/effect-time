@@ -22,9 +22,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `DateTime` | `effect/DateTime` | Constructing, comparing, adding to, formatting and converting instants in UTC or a time zone. |
 | `Rfc3339` | this package | Parsing and printing RFC 3339 date-times: `parser`, `parse`, `format`, `FromString`. |
 | `Rfc9557` | this package | Parsing and printing RFC 9557 (IXDTF) date-times with time zone and annotation suffixes: `parser`, `parse`, `toDateTime`, `format`, `FromString`. |
+| `PosixTz` | this package | Parsing and printing POSIX TZ strings (`EST5EDT,M3.2.0,M11.1.0`): `parser`, `parse`, `format`, `FromString`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -112,6 +113,20 @@ const program = Effect.map(
 The grammar is RFC 9557's `date-time-ext`: an RFC 3339 date-time (read by `Rfc3339.parser`), then at most one time zone suffix (`[Europe/Paris]`, `[+05:30]`), then any number of annotations (`[u-ca=hebrew]`, `[_x-key=a-b]`). A suffix starting with `!` is critical. The result is an `Ixdtf`: the instant as the written offset fixes it, the time zone suffix (`Option`) and the annotations, as written. `Rfc9557.toDateTime` views the instant in the suffixed time zone when `DateTime` knows it.
 
 Following RFC 9557 §3.4, a critical time zone that `DateTime` does not know, or whose offset at the instant differs from a numeric written offset, fails the parse; an elective one is kept as written. Critical annotations are reported with `critical: true` and never acted on: an application must reject the critical keys it does not understand itself. `Rfc9557.format` prints an `Ixdtf` back, and `Rfc9557.FromString` is the `Schema` from the string.
+
+### `PosixTz`
+
+```ts
+import { Effect, Option } from "effect";
+import { PosixTz } from "@thomasfosterau/effect-time";
+
+const program = Effect.map(PosixTz.parse("AEST-10AEDT,M10.1.0,M4.1.0/3"), (tz) => ({
+  standard: tz.std.utcOffset, // 36000: ten hours east of UTC
+  daylight: Option.map(tz.dst, (dst) => dst.utcOffset), // Option.some(39600)
+}));
+```
+
+The grammar is POSIX.1-2017 §8.3's `std offset [dst [offset] [,start[/time],end[/time]]]`, the `TZ` environment variable format and the footer of a TZif file. A designation is three or more letters (`AEST`) or three or more letters, digits, `+` and `-` in angle brackets (`<+1030>`). POSIX writes offsets positive _west_ of Greenwich (`EST5`); a parsed `Designation` stores `utcOffset` in seconds positive _east_, as ISO 8601 and `DateTime` do. A daylight designation without an offset is one hour ahead of standard time. Rule dates are `Jn` (1–365, never counting February 29), `n` (0–365) or `Mm.w.d` (week 5 is the last), each with an optional `/time` from -167 to 167 hours (the RFC 8536 extension), defaulting to 02:00. A string with a daylight designation but no rule (`EST5EDT`) gives `rule: Option.none()`, since POSIX leaves that rule to the implementation, and the implementation-defined `:name` form is not read. `PosixTz.format` prints a `PosixTz` back, leaving out the defaults, and `PosixTz.FromString` is the `Schema` from the string.
 
 ### `IsoDuration`
 
