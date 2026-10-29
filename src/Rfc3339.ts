@@ -12,6 +12,7 @@ import * as Token from "@thomasfosterau/effect-parse/Token";
 import * as DateTime from "effect/DateTime";
 import type * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
+import { daysInMonth } from "./internal/calendar.ts";
 
 const MINUTE_MILLIS = 60_000;
 
@@ -28,12 +29,6 @@ const bounded = (count: number, min: number, max: number, name: string): Parser.
     Parser.filter((n) => n >= min && n <= max),
     Parser.expected(name),
   );
-
-const isLeapYear = (year: number): boolean =>
-  year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-
-const daysInMonth = (year: number, month: number): number =>
-  month === 2 ? (isLeapYear(year) ? 29 : 28) : [4, 6, 9, 11].includes(month) ? 30 : 31;
 
 const fullDate = Parser.gen(function* () {
   const year = yield* digits(4).pipe(Parser.expected("year (4 digits)"));
