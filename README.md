@@ -25,9 +25,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `PosixTz` | this package | Parsing and printing POSIX TZ strings (`EST5EDT,M3.2.0,M11.1.0`): `parser`, `parse`, `format`, `FromString`. |
 | `CronExpression` | this package | Parsing cron expressions (`30 9 * * MON-FRI`, `@daily`) to Effect's `Cron`, with positioned errors: `parser`, `parserIn`, `parse`, `parseIn`, `format`, `FromString`. |
 | `RRule` | this package | Parsing and printing iCalendar recurrence rules (RFC 5545 `recur`, the value of `RRULE`): `parser`, `parse`, `format`, `FromString`. |
+| `IanaTimeZone` | this package | Checking IANA time zone names against the runtime's tz data: `parser`, `parse`, `known`, `isKnown`, `supported`, `FromString`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression`, `RRule` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression`, `RRule`, `IanaTimeZone` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -156,6 +157,21 @@ const program = Effect.map(RRule.parse("FREQ=MONTHLY;BYDAY=-1FR;COUNT=6"), (rule
 ```
 
 The grammar is RFC 5545 §3.3.10's `recur`, the value of an `RRULE` property (the text after `RRULE:`): `NAME=value` parts separated by `;`, in any order and any case, each at most once, `FREQ` required. A parsed `RRule` has `freq`, `until` and `count` (`Option`s), `interval` (default 1), the `BY…` lists (empty when absent), and `weekStart` (`WKST`, default `"MO"`). `UNTIL` is kept as written, a date or a date-time with or without `Z`, because a floating time has no instant until the rule's start gives it a zone. Every value is range-checked, and RFC 5545's cross-part restrictions fail the parse: `UNTIL` with `COUNT`, `BYDAY` ordinals outside `MONTHLY` and `YEARLY`, `BYMONTHDAY` with `WEEKLY`, `BYYEARDAY` with `DAILY`, `WEEKLY` or `MONTHLY`, `BYWEEKNO` outside `YEARLY`, and `BYSETPOS` alone. RFC 7529's `RSCALE` and `SKIP` are not read, and the rule is parsed, not expanded into occurrences. `RRule.format` prints a rule back in RFC 5545's part order, and `RRule.FromString` is the `Schema` from the string.
+
+### `IanaTimeZone`
+
+```ts
+import { DateTime, Effect } from "effect";
+import { IanaTimeZone } from "@thomasfosterau/effect-time";
+
+const program = Effect.map(IanaTimeZone.parse("Asia/Tokyo"), (zone) =>
+  DateTime.setZone(DateTime.makeUnsafe("2026-10-22T00:00:00Z"), zone),
+);
+
+IanaTimeZone.isKnown("Mars/Olympus_Mons"); // false
+```
+
+A name is read with the tz database's naming rules (`/`-separated components of 1–14 letters, digits, `.`, `_`, `-` and `+`) and then checked against the time zones the JavaScript runtime knows. Nothing is bundled: the answer comes from the runtime's ICU build, through `Intl.DateTimeFormat`, so it depends on that runtime and its tz data version. Aliases (`US/Eastern`), `UTC`, `Etc/GMT±n` and any letter case are accepted, and the result is the runtime's `DateTime.TimeZone.Named`, whose `id` is the runtime's canonical spelling. That spelling can differ between runtimes (`Asia/Kolkata` or `Asia/Calcutta`). `IanaTimeZone.supported()` is `Intl.supportedValuesOf("timeZone")`, the runtime's list of canonical names, for offering a choice. It is not the set of valid names, because V8 leaves `UTC`, `Etc/GMT±n` and every alias out of it. `IanaTimeZone.FromString` is the `Schema` from the name; it encodes the canonical `id`.
 
 ### `IsoDuration`
 

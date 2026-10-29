@@ -8,8 +8,9 @@
  * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`,
  * RFC 9557 time zone and annotation suffixes with `Rfc9557`, POSIX TZ
  * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`, cron expressions into
- * Effect's `Cron` with `CronExpression`, and iCalendar recurrence rules
- * (`FREQ=WEEKLY;BYDAY=MO`) with `RRule`.
+ * Effect's `Cron` with `CronExpression`, iCalendar recurrence rules
+ * (`FREQ=WEEKLY;BYDAY=MO`) with `RRule`, and IANA time zone names against
+ * the runtime's tz data with `IanaTimeZone`.
  *
  * @since 0.1.0
  */
@@ -184,3 +185,20 @@ export * as CronExpression from "./CronExpression.ts";
  * @since 0.1.0
  */
 export * as RRule from "./RRule.ts";
+
+/**
+ * IANA time zone names (`Europe/Paris`) checked against the time zones the
+ * runtime knows (its ICU build's tz data, with nothing bundled), as a
+ * parser to compose, an effectful decoder, predicates and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { IanaTimeZone } from "@thomasfosterau/effect-time"
+ *
+ * console.log(IanaTimeZone.isKnown("Pacific/Auckland")) // true
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as IanaTimeZone from "./IanaTimeZone.ts";
