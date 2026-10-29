@@ -9,8 +9,8 @@
  * RFC 9557 time zone and annotation suffixes with `Rfc9557`, POSIX TZ
  * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`, cron expressions into
  * Effect's `Cron` with `CronExpression`, iCalendar recurrence rules
- * (`FREQ=WEEKLY;BYDAY=MO`) with `RRule`, and IANA time zone names against
- * the runtime's tz data with `IanaTimeZone`.
+ * (`FREQ=WEEKLY;BYDAY=MO`) with `RRule`, IANA time zone names against the
+ * runtime's tz data with `IanaTimeZone`, and compiled TZif files with `Tzif`.
  *
  * @since 0.1.0
  */
@@ -202,3 +202,23 @@ export * as RRule from "./RRule.ts";
  * @since 0.1.0
  */
 export * as IanaTimeZone from "./IanaTimeZone.ts";
+
+/**
+ * TZif files (RFC 8536), the compiled zone files of the tz database: their
+ * transitions, local time types, leap seconds and POSIX TZ footer, as a
+ * binary parser to compose and an effectful decoder.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { Tzif } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(Effect.flip(Tzif.parse(new Uint8Array()))).then((error) =>
+ *   console.log(error._tag) // "ParseError"
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as Tzif from "./Tzif.ts";

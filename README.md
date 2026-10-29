@@ -26,9 +26,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `CronExpression` | this package | Parsing cron expressions (`30 9 * * MON-FRI`, `@daily`) to Effect's `Cron`, with positioned errors: `parser`, `parserIn`, `parse`, `parseIn`, `format`, `FromString`. |
 | `RRule` | this package | Parsing and printing iCalendar recurrence rules (RFC 5545 `recur`, the value of `RRULE`): `parser`, `parse`, `format`, `FromString`. |
 | `IanaTimeZone` | this package | Checking IANA time zone names against the runtime's tz data: `parser`, `parse`, `known`, `isKnown`, `supported`, `FromString`. |
+| `Tzif` | this package | Parsing compiled TZif zone files (RFC 8536): `parser`, `parse`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression`, `RRule`, `IanaTimeZone` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression`, `RRule`, `IanaTimeZone`, `Tzif` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -172,6 +173,20 @@ IanaTimeZone.isKnown("Mars/Olympus_Mons"); // false
 ```
 
 A name is read with the tz database's naming rules (`/`-separated components of 1–14 letters, digits, `.`, `_`, `-` and `+`) and then checked against the time zones the JavaScript runtime knows. Nothing is bundled: the answer comes from the runtime's ICU build, through `Intl.DateTimeFormat`, so it depends on that runtime and its tz data version. Aliases (`US/Eastern`), `UTC`, `Etc/GMT±n` and any letter case are accepted, and the result is the runtime's `DateTime.TimeZone.Named`, whose `id` is the runtime's canonical spelling. That spelling can differ between runtimes (`Asia/Kolkata` or `Asia/Calcutta`). `IanaTimeZone.supported()` is `Intl.supportedValuesOf("timeZone")`, the runtime's list of canonical names, for offering a choice. It is not the set of valid names, because V8 leaves `UTC`, `Etc/GMT±n` and every alias out of it. `IanaTimeZone.FromString` is the `Schema` from the name; it encodes the canonical `id`.
+
+### `Tzif`
+
+```ts
+import { Effect, Option } from "effect";
+import { PosixTz, Tzif } from "@thomasfosterau/effect-time";
+
+// `bytes` holds the contents of /usr/share/zoneinfo/Australia/Sydney.
+const program = (bytes: Uint8Array) =>
+  Effect.map(Tzif.parse(bytes), (tzif) => Option.map(tzif.footer, PosixTz.format));
+// Option.some("AEST-10AEDT,M10.1.0,M4.1.0/3")
+```
+
+`Tzif.parser` is an effect-parse binary parser over a `Uint8Array`, reading RFC 8536's TZif format, versions 1 to 4. For version 2 and later it reads the 64-bit data block and the footer, and skips the 32-bit block. A `Tzif` holds the transitions (a time in seconds since the epoch and an index into the local time types), the local time types (UTC offset in seconds east, DST flag, designation, and the standard/wall and UT/local indicators), the leap second records, and the footer parsed with `PosixTz.parser` (`Option.none()` when it is empty or the file is version 1). The parser enforces RFC 8536's structural requirements: the counts, ascending transition times, indices in range, 0/1 flags and a valid footer. A violation fails at its byte offset. Reading files is left to the caller, so the module works the same in a browser, a Worker or Node.
 
 ### `IsoDuration`
 
