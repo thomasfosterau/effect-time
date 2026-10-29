@@ -210,6 +210,33 @@ describe("Tzif.parser checks", () => {
     expect(failure(Zoneinfo.tokyo.subarray(0, Zoneinfo.tokyo.length - 1))).toContain("newline");
   });
 
+  it("bounds the footer and requires printable ASCII, failing rather than throwing", () => {
+    // Tokyo's file ends "\nJST-9\n"; keep everything before the footer.
+    const body = Zoneinfo.tokyo.subarray(0, Zoneinfo.tokyo.length - "\nJST-9\n".length);
+    const withFooter = (footer: ReadonlyArray<number>) =>
+      new Uint8Array([...body, 0x0a, ...footer]);
+    const huge = new Uint8Array(body.length + 1 + 1_000_000).fill(0x41);
+    huge.set(body);
+    huge[body.length] = 0x0a;
+    expect(failure(huge)).toContain(
+      "newline ending the footer (at most 255 printable ASCII bytes)",
+    );
+    expect(failure(withFooter([...Array.from({ length: 256 }, () => 0x41), 0x0a]))).toContain(
+      "newline ending the footer",
+    );
+    expect(failure(withFooter([0x4a, 0x01, 0x0a]))).toContain("newline ending the footer");
+    expect(failure(withFooter([0x4a, 0xc3, 0xa9, 0x0a]))).toContain("newline ending the footer");
+  });
+
+  it("bounds designations and requires printable ASCII", () => {
+    expect(failure(v1({ chars: `${"A".repeat(33)}\0` }))).toContain("longer than 32 bytes");
+    expect(parseSync(v1({ chars: `${"A".repeat(32)}\0` })).localTimeTypes[0]?.designation).toBe(
+      "A".repeat(32),
+    );
+    expect(failure(v1({ chars: "U\u0001C\0" }))).toContain("not printable ASCII");
+    expect(failure(v1({ chars: "UTC" }))).toContain("not NUL-terminated");
+  });
+
   it("rejects a truncated file", () => {
     expect(failure(Zoneinfo.sydney.subarray(0, 200))).not.toBe("");
   });

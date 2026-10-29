@@ -128,13 +128,42 @@ const header: Parser.Parser<Header, never, never, Uint8Array> = Parser.gen(funct
   return { version, isutcnt, isstdcnt, leapcnt, timecnt, typecnt, charcnt };
 });
 
-// Designations and the footer are ASCII; read them byte for byte.
-const ascii = (bytes: Uint8Array): string => String.fromCharCode(...bytes);
+/**
+ * The longest footer accepted, in bytes. RFC 8536 sets no limit; the
+ * tz database's footers are under 100 bytes, so this leaves room while
+ * bounding what a hostile file can make the parser hold.
+ */
+const MAX_FOOTER = 255;
 
-// The NUL-terminated designation starting at `index`.
-const designationAt = (chars: Uint8Array, index: number): string => {
+/**
+ * The longest designation accepted, in bytes. RFC 8536 recommends 3 to 6
+ * characters; the reference implementation's limit (`TZ_MAX_CHARS`) is 50
+ * for all of them together.
+ */
+const MAX_DESIGNATION = 32;
+
+const isPrintableAscii = (b: number): boolean => b >= 0x20 && b <= 0x7e;
+
+// Byte by byte, so the input's size never reaches the call stack; only
+// ever called on bounded, printable ASCII.
+const ascii = (bytes: Uint8Array): string =>
+  Arr.join(
+    Arr.map(Array.from(bytes), (b) => String.fromCharCode(b)),
+    "",
+  );
+
+// The NUL-terminated designation starting at `index`, or why it is not one.
+const designationAt = (chars: Uint8Array, index: number): Result.Result<string, string> => {
   const end = chars.indexOf(0, index);
-  return ascii(chars.subarray(index, end === -1 ? chars.length : end));
+  if (end === -1) return Result.fail(`the designation at index ${index} is not NUL-terminated`);
+  const bytes = chars.subarray(index, end);
+  if (bytes.length > MAX_DESIGNATION) {
+    return Result.fail(`the designation at index ${index} is longer than ${MAX_DESIGNATION} bytes`);
+  }
+  if (!bytes.every(isPrintableAscii)) {
+    return Result.fail(`the designation at index ${index} is not printable ASCII`);
+  }
+  return Result.succeed(ascii(bytes));
 };
 
 const isAscending = (times: ReadonlyArray<number>): boolean =>
@@ -188,10 +217,14 @@ const dataBlock = (h: Header, width: 4 | 8) =>
     if (Arr.some(universal, (ut, i) => ut && !(standard[i] ?? false))) {
       return yield* failAt<never>("a UT indicator is set without its standard/wall indicator");
     }
+    const designations = Result.all(
+      Arr.map(infos, (info) => designationAt(chars, info.designationIndex)),
+    );
+    if (Result.isFailure(designations)) return yield* failAt<never>(designations.failure);
     const localTimeTypes = Arr.map(infos, (info, i): LocalTimeType => ({
       utcOffset: info.utcOffset,
       isDst: info.isDst,
-      designation: designationAt(chars, info.designationIndex),
+      designation: designations.success[i] ?? "",
       standard: standard[i] ?? false,
       universal: universal[i] ?? false,
     }));
@@ -201,17 +234,20 @@ const dataBlock = (h: Header, width: 4 | 8) =>
 
 const newline = Token.literal(new Uint8Array([0x0a])).pipe(Parser.expected("newline"));
 
+const footerEnd = newline.pipe(
+  Parser.expected(`newline ending the footer (at most ${MAX_FOOTER} printable ASCII bytes)`),
+);
+
 // `\n`, a POSIX TZ string (possibly empty), `\n`.
 const footer: Parser.Parser<Option.Option<PosixTz.PosixTz>, never, never, Uint8Array> = Parser.gen(
   function* () {
     yield* newline;
+    // Printable ASCII and at most MAX_FOOTER bytes: anything else fails at
+    // the offending byte, expecting the closing newline.
     const text = yield* Parser.taken(
-      Binary.u8.pipe(
-        Parser.filter((b) => b !== 0x0a),
-        Parser.repeat(),
-      ),
+      Binary.u8.pipe(Parser.filter(isPrintableAscii), Parser.repeat({ min: 0, max: MAX_FOOTER })),
     );
-    yield* newline;
+    yield* Parser.cut(footerEnd);
     const footerText = ascii(text);
     if (Str.isEmpty(footerText)) return Option.none<PosixTz.PosixTz>();
     const posix = Parser.parse(PosixTz.parser, footerText);
@@ -232,8 +268,10 @@ const footer: Parser.Parser<Option.Option<PosixTz.PosixTz>, never, never, Uint8A
  * checked: the counts (`typecnt` and `charcnt` non-zero, `isutcnt` and
  * `isstdcnt` 0 or `typecnt`), ascending transition times, type and
  * designation indices in range, 0/1 indicators, no UT indicator without its
- * standard one, and a footer that is a valid POSIX TZ string (see
- * {@link PosixTz.parser}).
+ * standard one, NUL-terminated designations of at most 32 printable ASCII
+ * bytes, and a footer of at most 255 printable ASCII bytes that is a valid
+ * POSIX TZ string (see {@link PosixTz.parser}). The bounds keep a hostile
+ * file from making the parser hold or build arbitrarily large strings.
  *
  * 64-bit times are converted to numbers: exact for any time within
  * ±2^53 seconds, and for the -2^59 "big bang" transition the tz database
