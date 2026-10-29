@@ -14,6 +14,7 @@ import * as Arr from "effect/Array";
 import type * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Record from "effect/Record";
+import { daysInMonth } from "./internal/calendar.ts";
 
 /**
  * How often a rule repeats (`FREQ`).
@@ -143,12 +144,6 @@ const inRange = (count: number, min: number, max: number, label: string): Parser
     Parser.filter((n) => n >= min && n <= max),
     Parser.expected(label),
   );
-
-const isLeapYear = (year: number): boolean =>
-  year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-
-const daysInMonth = (year: number, month: number): number =>
-  month === 2 ? (isLeapYear(year) ? 29 : 28) : [4, 6, 9, 11].includes(month) ? 30 : 31;
 
 const untilTime: Parser.Parser<UntilTime> = Parser.preceded(
   Token.literal("T"),
