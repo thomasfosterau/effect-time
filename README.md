@@ -23,9 +23,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `Rfc3339` | this package | Parsing and printing RFC 3339 date-times: `parser`, `parse`, `format`, `FromString`. |
 | `Rfc9557` | this package | Parsing and printing RFC 9557 (IXDTF) date-times with time zone and annotation suffixes: `parser`, `parse`, `toDateTime`, `format`, `FromString`. |
 | `PosixTz` | this package | Parsing and printing POSIX TZ strings (`EST5EDT,M3.2.0,M11.1.0`): `parser`, `parse`, `format`, `FromString`. |
+| `CronExpression` | this package | Parsing cron expressions (`30 9 * * MON-FRI`, `@daily`) to Effect's `Cron`, with positioned errors: `parser`, `parserIn`, `parse`, `parseIn`, `format`, `FromString`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -127,6 +128,21 @@ const program = Effect.map(PosixTz.parse("AEST-10AEDT,M10.1.0,M4.1.0/3"), (tz) =
 ```
 
 The grammar is POSIX.1-2017 §8.3's `std offset [dst [offset] [,start[/time],end[/time]]]`, the `TZ` environment variable format and the footer of a TZif file. A designation is three or more letters (`AEST`) or three or more letters, digits, `+` and `-` in angle brackets (`<+1030>`). POSIX writes offsets positive _west_ of Greenwich (`EST5`); a parsed `Designation` stores `utcOffset` in seconds positive _east_, as ISO 8601 and `DateTime` do. A daylight designation without an offset is one hour ahead of standard time. Rule dates are `Jn` (1–365, never counting February 29), `n` (0–365) or `Mm.w.d` (week 5 is the last), each with an optional `/time` from -167 to 167 hours (the RFC 8536 extension), defaulting to 02:00. A string with a daylight designation but no rule (`EST5EDT`) gives `rule: Option.none()`, since POSIX leaves that rule to the implementation, and the implementation-defined `:name` form is not read. `PosixTz.format` prints a `PosixTz` back, leaving out the defaults, and `PosixTz.FromString` is the `Schema` from the string.
+
+### `CronExpression`
+
+```ts
+import { Cron, DateTime, Effect } from "effect";
+import { CronExpression } from "@thomasfosterau/effect-time";
+
+const nextRun = Effect.map(
+  CronExpression.parseIn("0 9 * * MON-FRI", DateTime.zoneMakeNamedUnsafe("Australia/Sydney")),
+  (cron) => Cron.next(cron, DateTime.makeUnsafe("2026-10-24T00:00:00Z")),
+);
+// 2026-10-25T22:00:00.000Z, 9:00 on Monday in Sydney
+```
+
+The result is Effect's own `Cron`, so `Cron.next`, `Cron.match` and `Cron.sequence` work on it, and for a valid expression it equals what `Cron.parse` gives. What this module adds is the error: a value out of range, a range that runs backwards, a zero step or a wrong field count fails at its column and names the field, as an effect-parse `ParseError`. The grammar is Vixie cron's: five fields (minute, hour, day of month, month, day of week) or six with a leading second, each a comma-separated list of `*`, `n` or `a-b` with an optional `/step`, month and weekday names in any case, Sunday as 0 or 7, and the macros `@yearly`, `@annually`, `@monthly`, `@weekly`, `@daily`, `@midnight` and `@hourly`. When both day fields are restricted a time matches either, unless one starts with `*`. Quartz's `?`, `L`, `W` and `#` are not read. `CronExpression.parseIn` and `CronExpression.parserIn` take a time zone, `CronExpression.format` prints with `Cron.format`, and `CronExpression.FromString` is the `Schema` from the string.
 
 ### `IsoDuration`
 

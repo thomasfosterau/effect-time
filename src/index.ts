@@ -6,8 +6,9 @@
  * and do calendar arithmetic, formatting and time-zone conversion on
  * `DateTime` values, never on the global `Date`. Parse RFC 3339 timestamps
  * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`,
- * RFC 9557 time zone and annotation suffixes with `Rfc9557`, and POSIX TZ
- * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`.
+ * RFC 9557 time zone and annotation suffixes with `Rfc9557`, POSIX TZ
+ * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`, and cron expressions
+ * into Effect's `Cron` with `CronExpression`.
  *
  * @since 0.1.0
  */
@@ -141,3 +142,23 @@ export * as IsoDuration from "./IsoDuration.ts";
  * @since 0.1.0
  */
 export * as PosixTz from "./PosixTz.ts";
+
+/**
+ * Cron expressions (`30 9 * * MON-FRI`, `@daily`) parsed to Effect's `Cron`
+ * values with errors that name the field and column, as a parser to
+ * compose, an effectful decoder, a printer and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Cron, Effect } from "effect"
+ * import { CronExpression } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(CronExpression.parse("@daily")).then((cron) =>
+ *   console.log(Cron.format(cron)) // "0 0 * * *"
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as CronExpression from "./CronExpression.ts";
