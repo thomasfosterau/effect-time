@@ -6,7 +6,8 @@
  * and do calendar arithmetic, formatting and time-zone conversion on
  * `DateTime` values, never on the global `Date`. Parse RFC 3339 timestamps
  * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`,
- * and RFC 9557 time zone and annotation suffixes with `Rfc9557`.
+ * RFC 9557 time zone and annotation suffixes with `Rfc9557`, and POSIX TZ
+ * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`.
  *
  * @since 0.1.0
  */
@@ -119,3 +120,24 @@ export * as Rfc9557 from "./Rfc9557.ts";
  * @since 0.1.0
  */
 export * as IsoDuration from "./IsoDuration.ts";
+
+/**
+ * POSIX TZ strings (`EST5EDT,M3.2.0,M11.1.0`), the `TZ` environment variable
+ * format and the footer of a TZif file: standard and daylight designations
+ * with their UTC offsets and the daylight saving rule, as a parser to
+ * compose, an effectful decoder, a printer and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { PosixTz } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(PosixTz.parse("NZST-12NZDT,M9.5.0,M4.1.0/3")).then((tz) =>
+ *   console.log(tz.std.utcOffset / 3600) // 12
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as PosixTz from "./PosixTz.ts";
