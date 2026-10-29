@@ -7,8 +7,9 @@
  * `DateTime` values, never on the global `Date`. Parse RFC 3339 timestamps
  * and ISO 8601 durations into those values with `Rfc3339` and `IsoDuration`,
  * RFC 9557 time zone and annotation suffixes with `Rfc9557`, POSIX TZ
- * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`, and cron expressions
- * into Effect's `Cron` with `CronExpression`.
+ * strings (`EST5EDT,M3.2.0,M11.1.0`) with `PosixTz`, cron expressions into
+ * Effect's `Cron` with `CronExpression`, and iCalendar recurrence rules
+ * (`FREQ=WEEKLY;BYDAY=MO`) with `RRule`.
  *
  * @since 0.1.0
  */
@@ -162,3 +163,24 @@ export * as PosixTz from "./PosixTz.ts";
  * @since 0.1.0
  */
 export * as CronExpression from "./CronExpression.ts";
+
+/**
+ * iCalendar recurrence rules (`FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10`), the
+ * RFC 5545 `recur` value of an `RRULE` property, with RFC 5545's
+ * cross-part restrictions, as a parser to compose, an effectful decoder, a
+ * printer and a `Schema`.
+ *
+ * @example
+ * ```ts
+ * import { Effect } from "effect"
+ * import { RRule } from "@thomasfosterau/effect-time"
+ *
+ * Effect.runPromise(RRule.parse("FREQ=DAILY;INTERVAL=2")).then((rule) =>
+ *   console.log(rule.interval) // 2
+ * )
+ * ```
+ *
+ * @category modules
+ * @since 0.1.0
+ */
+export * as RRule from "./RRule.ts";

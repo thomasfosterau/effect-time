@@ -24,9 +24,10 @@ pnpm add @thomasfosterau/effect-time effect @thomasfosterau/effect-parse
 | `Rfc9557` | this package | Parsing and printing RFC 9557 (IXDTF) date-times with time zone and annotation suffixes: `parser`, `parse`, `toDateTime`, `format`, `FromString`. |
 | `PosixTz` | this package | Parsing and printing POSIX TZ strings (`EST5EDT,M3.2.0,M11.1.0`): `parser`, `parse`, `format`, `FromString`. |
 | `CronExpression` | this package | Parsing cron expressions (`30 9 * * MON-FRI`, `@daily`) to Effect's `Cron`, with positioned errors: `parser`, `parserIn`, `parse`, `parseIn`, `format`, `FromString`. |
+| `RRule` | this package | Parsing and printing iCalendar recurrence rules (RFC 5545 `recur`, the value of `RRULE`): `parser`, `parse`, `format`, `FromString`. |
 | `IsoDuration` | this package | Parsing and printing ISO 8601 durations: `parser`, `parse`, `format`, `FromString`, `zero`. |
 
-The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression` and `IsoDuration` are documented below and in their doc comments.
+The full reference for `Clock` and `DateTime` is Effect's own: the doc comments `effect` ships with `effect/Clock` and `effect/DateTime` (your editor's hover), and [effect.website](https://effect.website). `Rfc3339`, `Rfc9557`, `PosixTz`, `CronExpression`, `RRule` and `IsoDuration` are documented below and in their doc comments.
 
 ### `Clock`
 
@@ -143,6 +144,18 @@ const nextRun = Effect.map(
 ```
 
 The result is Effect's own `Cron`, so `Cron.next`, `Cron.match` and `Cron.sequence` work on it, and for a valid expression it equals what `Cron.parse` gives. What this module adds is the error: a value out of range, a range that runs backwards, a zero step or a wrong field count fails at its column and names the field, as an effect-parse `ParseError`. The grammar is Vixie cron's: five fields (minute, hour, day of month, month, day of week) or six with a leading second, each a comma-separated list of `*`, `n` or `a-b` with an optional `/step`, month and weekday names in any case, Sunday as 0 or 7, and the macros `@yearly`, `@annually`, `@monthly`, `@weekly`, `@daily`, `@midnight` and `@hourly`. When both day fields are restricted a time matches either, unless one starts with `*`. Quartz's `?`, `L`, `W` and `#` are not read. `CronExpression.parseIn` and `CronExpression.parserIn` take a time zone, `CronExpression.format` prints with `Cron.format`, and `CronExpression.FromString` is the `Schema` from the string.
+
+### `RRule`
+
+```ts
+import { Effect } from "effect";
+import { RRule } from "@thomasfosterau/effect-time";
+
+const program = Effect.map(RRule.parse("FREQ=MONTHLY;BYDAY=-1FR;COUNT=6"), (rule) => rule.byDay);
+// [{ ordinal: Option.some(-1), weekday: "FR" }]: the last Friday of each month
+```
+
+The grammar is RFC 5545 §3.3.10's `recur`, the value of an `RRULE` property (the text after `RRULE:`): `NAME=value` parts separated by `;`, in any order and any case, each at most once, `FREQ` required. A parsed `RRule` has `freq`, `until` and `count` (`Option`s), `interval` (default 1), the `BY…` lists (empty when absent), and `weekStart` (`WKST`, default `"MO"`). `UNTIL` is kept as written, a date or a date-time with or without `Z`, because a floating time has no instant until the rule's start gives it a zone. Every value is range-checked, and RFC 5545's cross-part restrictions fail the parse: `UNTIL` with `COUNT`, `BYDAY` ordinals outside `MONTHLY` and `YEARLY`, `BYMONTHDAY` with `WEEKLY`, `BYYEARDAY` with `DAILY`, `WEEKLY` or `MONTHLY`, `BYWEEKNO` outside `YEARLY`, and `BYSETPOS` alone. RFC 7529's `RSCALE` and `SKIP` are not read, and the rule is parsed, not expanded into occurrences. `RRule.format` prints a rule back in RFC 5545's part order, and `RRule.FromString` is the `Schema` from the string.
 
 ### `IsoDuration`
 
