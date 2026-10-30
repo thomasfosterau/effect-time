@@ -131,11 +131,17 @@ export default defineConfig({
         },
       },
     ],
-    // Type-aware linting is intentionally disabled: type checking stays the
-    // `check` task's job (native tsc, Effect-patched).
+    // Type-aware linting through oxlint-tsgolint (bundled with Vite+, patched
+    // by `effect-tsgo patch --oxlint`): `typeAware` turns on the rules that
+    // need type information, `typeCheck` reports TypeScript diagnostics in
+    // `vp check` as well. The `check` task (native, Effect-patched tsc) stays
+    // the type gate of record and adds the Effect diagnostics. tsgolint types
+    // a file with the nearest `tsconfig.json`, so `tests/tsconfig.json`
+    // (extending tsconfig.test.json) is what lets the tests resolve the
+    // package name to `src/` here.
     options: {
-      typeAware: false,
-      typeCheck: false,
+      typeAware: true,
+      typeCheck: true,
     },
     jsPlugins: [
       {

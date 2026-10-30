@@ -114,7 +114,7 @@ describe("IsoDuration.format", () => {
 
 describe("IsoDuration.FromString", () => {
   it("decodes a string to amounts", () => {
-    expect(Schema.decodeUnknownSync(IsoDuration.FromString)("PT30S")).toEqual({
+    expect(Schema.decodeSync(IsoDuration.FromString)("PT30S")).toEqual({
       ...IsoDuration.zero,
       seconds: 30,
     });
@@ -125,7 +125,7 @@ describe("IsoDuration.FromString", () => {
   });
 
   it("reports the ParseError message as the issue", () => {
-    expect(() => Schema.decodeUnknownSync(IsoDuration.FromString)("P1W2D")).toThrow(/end of input/);
+    expect(() => Schema.decodeSync(IsoDuration.FromString)("P1W2D")).toThrow(/end of input/);
   });
 
   it("fails to encode mixed signs", () => {

@@ -140,13 +140,13 @@ describe("PosixTz.format", () => {
 
 describe("PosixTz.FromString", () => {
   it("decodes and encodes", () => {
-    const decode = Schema.decodeUnknownSync(PosixTz.FromString);
+    const decode = Schema.decodeSync(PosixTz.FromString);
     const tz = decode("CET-1CEST,M3.5.0,M10.5.0/3");
     expect(tz.std.utcOffset).toBe(HOUR);
     expect(Schema.encodeSync(PosixTz.FromString)(tz)).toBe("CET-1CEST,M3.5.0,M10.5.0/3");
   });
 
   it("reports the parse error as an issue", () => {
-    expect(() => Schema.decodeUnknownSync(PosixTz.FromString)("EST")).toThrow(/UTC offset/);
+    expect(() => Schema.decodeSync(PosixTz.FromString)("EST")).toThrow(/UTC offset/);
   });
 });

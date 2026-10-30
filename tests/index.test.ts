@@ -8,6 +8,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { Effect } from "effect";
 import * as EffectClock from "effect/Clock";
 import * as EffectDateTime from "effect/DateTime";
+import * as ManagedRuntime from "effect/ManagedRuntime";
 import * as TestClock from "effect/testing/TestClock";
 import { Clock, DateTime } from "@thomasfosterau/effect-time";
 
@@ -16,15 +17,22 @@ describe("Clock", () => {
     expect(Clock).toBe(EffectClock);
   });
 
-  it("reads the TestClock in place of the wall clock", () =>
-    Effect.runPromise(
-      Effect.gen(function* () {
-        yield* TestClock.setTime(1_700_000_000_000);
-        return yield* Clock.currentTimeMillis;
-      }).pipe(Effect.provide(TestClock.layer())),
-    ).then((millis) => {
-      expect(millis).toBe(1_700_000_000_000);
-    }));
+  it("reads the TestClock in place of the wall clock", () => {
+    // The test is the entry point, so the TestClock layer is built into a
+    // runtime here rather than provided inside the program.
+    const runtime = ManagedRuntime.make(TestClock.layer());
+    return runtime
+      .runPromise(
+        Effect.gen(function* () {
+          yield* TestClock.setTime(1_700_000_000_000);
+          return yield* Clock.currentTimeMillis;
+        }),
+      )
+      .finally(() => runtime.dispose())
+      .then((millis) => {
+        expect(millis).toBe(1_700_000_000_000);
+      });
+  });
 });
 
 describe("DateTime", () => {

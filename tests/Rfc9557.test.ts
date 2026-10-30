@@ -141,14 +141,14 @@ describe("Rfc9557.format", () => {
 describe("Rfc9557.FromString", () => {
   it("decodes and encodes", () => {
     const input = "2026-10-22T09:30:00.000+11:00[Australia/Sydney][u-ca=gregory]";
-    const ixdtf = Schema.decodeUnknownSync(Rfc9557.FromString)(input);
+    const ixdtf = Schema.decodeSync(Rfc9557.FromString)(input);
     expect(ixdtf.annotations).toEqual([{ key: "u-ca", values: ["gregory"], critical: false }]);
     expect(Schema.encodeSync(Rfc9557.FromString)(ixdtf)).toBe(input);
   });
 
   it("reports a parse failure as a decoding issue", () => {
-    expect(() =>
-      Schema.decodeUnknownSync(Rfc9557.FromString)("2026-10-22T09:30:00Z[!Nowhere]"),
-    ).toThrow('unknown time zone "Nowhere"');
+    expect(() => Schema.decodeSync(Rfc9557.FromString)("2026-10-22T09:30:00Z[!Nowhere]")).toThrow(
+      'unknown time zone "Nowhere"',
+    );
   });
 });
