@@ -119,7 +119,7 @@ describe("Rfc3339.format", () => {
 
 describe("Rfc3339.FromString", () => {
   it("decodes a string to a DateTime", () => {
-    const dt = Schema.decodeUnknownSync(Rfc3339.FromString)("2026-10-22T09:30:00+10:00");
+    const dt = Schema.decodeSync(Rfc3339.FromString)("2026-10-22T09:30:00+10:00");
     expect(DateTime.formatIso(dt)).toBe("2026-10-21T23:30:00.000Z");
   });
 
@@ -129,7 +129,7 @@ describe("Rfc3339.FromString", () => {
   });
 
   it("reports the ParseError message as the issue", () => {
-    expect(() => Schema.decodeUnknownSync(Rfc3339.FromString)("2026-02-30T00:00:00Z")).toThrow(
+    expect(() => Schema.decodeSync(Rfc3339.FromString)("2026-02-30T00:00:00Z")).toThrow(
       /day of month \(01-28\)/,
     );
   });

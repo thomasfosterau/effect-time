@@ -34,7 +34,7 @@ This repo publishes one package from its root: `@thomasfosterau/effect-time`, Ef
 ## Commands
 
 - `pnpm install` — dependencies plus the Vite+ git hooks (pre-commit runs `vp staged`: format + lint on staged files) and the `prepare` step that patches the native `tsc` / `oxlint` with `@effect/tsgo`. No pre-push hook: run the gates yourself.
-- `vp check` — format + lint (Oxfmt + Oxlint with the Effect plugin). `vp run check` — the type gate: `src` under `tsconfig.json`, then tests and `vite.config.ts` under `tsconfig.test.json`. They are different commands.
+- `vp check` — format + lint (Oxfmt + Oxlint with the Effect plugin), type-aware through oxlint-tsgolint (`typeAware` + `typeCheck`; `tests/tsconfig.json` gives the tests their tsconfig there). `vp run check` — the type gate: `src` under `tsconfig.json`, then tests and `vite.config.ts` under `tsconfig.test.json`. They are different commands.
 - `vp run test:unit` — unit tests.
 - `vp run build` — `vp pack` → `dist/`.
 - `vp run docgen` — compiles and runs each `@example` against `dist/` and writes the (git-ignored) API reference under `docs/`.
