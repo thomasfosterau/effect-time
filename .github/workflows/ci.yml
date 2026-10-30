@@ -43,15 +43,15 @@ jobs:
           restore-keys: |
             vp-task-v1-${{ runner.os }}-
       - name: Format and lint
-        run: vp check
+        run: pnpm exec vp check
       - name: Type gate (src + tests)
-        run: vp run check
+        run: pnpm exec vp run check
       - name: Unit tests
-        run: vp run test:unit
+        run: pnpm exec vp run test:unit
       - name: Build
-        run: vp run build
+        run: pnpm exec vp run build
       # Type-checks AND runs every JSDoc @example against the built dist/.
       - name: Verify documentation examples (docgen)
-        run: vp run docgen
+        run: pnpm exec vp run docgen
       - name: Audit
         run: pnpm audit --audit-level high
