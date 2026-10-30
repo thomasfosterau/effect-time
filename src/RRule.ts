@@ -263,9 +263,10 @@ const parts = (seen: ReadonlyArray<string>): Parser.Parser<Fragment> =>
     return { ...fragment, ...Option.getOrElse(rest, (): Fragment => ({})) };
   });
 
+const restricted = (f: Frequency): boolean => f !== "MONTHLY" && f !== "YEARLY";
+
 // RFC 5545 §3.3.10's MUST NOTs that span parts.
 const violation = (rule: RRule): Option.Option<string> => {
-  const restricted = (f: Frequency): boolean => f !== "MONTHLY" && f !== "YEARLY";
   const checks: ReadonlyArray<readonly [boolean, string]> = [
     [
       Option.isSome(rule.until) && Option.isSome(rule.count),

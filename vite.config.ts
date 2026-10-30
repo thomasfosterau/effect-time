@@ -16,7 +16,7 @@
 
 import { defineConfig } from "vite-plus";
 import { recommended } from "@effect/tsgo/oxlint-presets";
-import effect from "@mpsuesser/oxlint-plugin-effect";
+import effect from "@enfect/oxlint";
 
 const NAME = "@thomasfosterau/effect-time";
 
@@ -49,10 +49,20 @@ export default defineConfig({
   lint: {
     ignorePatterns: ["**/dist/**", "**/docs/**", "**/coverage/**", "**/node_modules/**"],
     extends: [recommended, effect.configs.recommended],
+    // oxlint's default plugins plus `import`, `vitest` and `jsdoc`. Not
+    // `promise`: `src/` holds no Promise code (failures are Effects), and its
+    // rules only fire on the tests' `Effect.runPromise(…).then(…)` bodies,
+    // whose resolved value vitest discards by design.
+    plugins: ["eslint", "typescript", "unicorn", "oxc", "import", "vitest", "jsdoc"],
     categories: {
       correctness: "error",
+      suspicious: "error",
+      perf: "error",
     },
     rules: {
+      "jsdoc/check-tag-names": ["error", { definedTags: ["category"] }],
+      // `_tag` is the discriminant of every Effect tagged value and error.
+      "eslint/no-underscore-dangle": ["error", { allow: ["_tag"] }],
       "eslint/no-unused-vars": [
         "warn",
         {

@@ -1,0 +1,16 @@
+# zizmor configuration (`uvx zizmor .github`). Each exemption says why the
+# audit's default does not fit this repository.
+rules:
+  # The owner's supply-chain policy is pnpm `minimumReleaseAge: 480` (8 hours)
+  # with Dependabot's `cooldown` at 1 day, its smallest unit (see the header
+  # of dependabot.yml); zizmor's default asks for 7.
+  dependabot-cooldown:
+    config:
+      days: 1
+  # The Release job's checkout keeps its credentials on purpose: the
+  # Changesets action pushes the "Version Packages" branch and the release
+  # tags with the job-scoped GITHUB_TOKEN. The job runs only on pushes to
+  # `trunk`, never for a pull request or a Dependabot branch.
+  artipacked:
+    ignore:
+      - release.yml

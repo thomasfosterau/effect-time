@@ -11,8 +11,8 @@
 #   (the `prepare` step) matches the native `tsc` (`@typescript/native`) and
 #   `oxlint` by gitHead and hard-errors on any pairing it has no artifact
 #   for; `typescript` is the TS6 alias (`@typescript/typescript6`) beside it;
-#   the Effect oxlint plugin loads inside that oxlint. See the catalog
-#   comments in pnpm-workspace.yaml before merging one.
+#   the Effect oxlint plugin (`@enfect/oxlint`) loads inside that oxlint. See
+#   the catalog comments in pnpm-workspace.yaml before merging one.
 # - `docgen`: `@effect/docgen` runs its examples under `tsx`. Listed before
 #   `effect` so `@effect/docgen` does not land in the `effect` group.
 # - `changesets`, `fallow`: their own release cadence.
@@ -21,8 +21,22 @@
 # - `minor-and-patch`: everything else (`@types/node`); a major of one of
 #   these opens its own PR.
 #
-# `cooldown` mirrors pnpm-workspace.yaml's `minimumReleaseAge` (1 day), with
-# the same first-party exemption.
+# Hand moves Dependabot cannot make (do them on the `toolchain` PR's branch):
+# - `vite` is an npm alias (`npm:@voidzero-dev/vite-plus-core@<v>`) and must
+#   name the same version as `vite-plus`; Dependabot cannot rewrite aliases.
+#   Likewise `typescript` (`npm:@typescript/typescript6@<v>`) and
+#   `@typescript/native` (`npm:typescript@<v>`), which must match a release in
+#   `@effect/tsgo`'s `components` table.
+# - `vitest` / `@vitest/coverage-istanbul` must equal vite-plus's exact vitest
+#   pin, and `@effect/tsgo` must support vite-plus's oxlint / tsgolint: when
+#   the toolchain PR goes red at `pnpm install`, pick the pairing by hand.
+# - The `overrides` (`effect`, `vite@*`, `vitest@*`) follow their catalog
+#   entries; `catalogs.peers` ranges are by hand, with a changeset.
+#
+# `cooldown`: pnpm-workspace.yaml's `minimumReleaseAge` is 480 minutes
+# (8 hours). Dependabot's cooldown only takes whole days, so it is 1 day,
+# which is longer than pnpm's hold: a Dependabot PR never proposes a version
+# pnpm would still refuse to install. Same first-party exemption.
 version: 2
 updates:
   - package-ecosystem: "npm"
@@ -54,7 +68,8 @@ updates:
           - "@typescript/native"
           - "typescript"
           - "@typescript/typescript6"
-          - "@mpsuesser/oxlint-plugin-effect"
+          - "@oxlint/*"
+          - "@enfect/oxlint"
         update-types: ["major", "minor", "patch"]
       docgen:
         applies-to: version-updates
@@ -96,6 +111,8 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 1
     groups:
       github-actions:
         applies-to: version-updates

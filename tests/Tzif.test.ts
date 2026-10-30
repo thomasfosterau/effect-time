@@ -61,9 +61,9 @@ const v1 = (spec: V1): Uint8Array => {
     ...u32(chars.length),
     ...times.flatMap(i32),
     ...(spec.types ?? times.map(() => 0)),
-    ...infos.flatMap(([offset, dst, index]) => [...i32(offset), dst, index]),
+    ...infos.flatMap(([offset, dst, index]) => [i32(offset), [dst, index]].flat()),
     ...Array.from(chars, (c) => c.charCodeAt(0)),
-    ...leaps.flatMap(([occurrence, correction]) => [...i32(occurrence), ...i32(correction)]),
+    ...leaps.flatMap(([occurrence, correction]) => [i32(occurrence), i32(correction)].flat()),
     ...std,
     ...ut,
   ]);

@@ -135,6 +135,8 @@ describe("Rfc3339.FromString", () => {
   });
 
   it("rejects a non-string", () => {
-    expect(() => Schema.decodeUnknownSync(Rfc3339.FromString)(1_700_000_000_000)).toThrow();
+    expect(() => Schema.decodeUnknownSync(Rfc3339.FromString)(1_700_000_000_000)).toThrow(
+      /Expected string/,
+    );
   });
 });

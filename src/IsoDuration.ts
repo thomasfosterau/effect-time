@@ -217,10 +217,10 @@ const KEYS = [
 
 const printSeconds = (millis: number): string => {
   const whole = Math.trunc(millis / 1000);
-  const fraction = millis % 1000;
-  return fraction === 0
+  const remainder = millis % 1000;
+  return remainder === 0
     ? `${whole}`
-    : `${whole}.${String(fraction).padStart(3, "0").replace(/0+$/, "")}`;
+    : `${whole}.${String(remainder).padStart(3, "0").replace(/0+$/, "")}`;
 };
 
 const designated = (value: number, letter: string): string =>
